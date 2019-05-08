@@ -6,25 +6,25 @@
   <configuration>
     <name>Debug</name>
     <outputs>
-      <file>$PROJ_DIR$\..\main.c</file>
-      <file>$PROJ_DIR$\..\..\..\core\at_engine.c</file>
-      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\hal\stm32f0xx_it.c</file>
       <file>$PROJ_DIR$\..\..\..\core\common.c</file>
       <file>$PROJ_DIR$\..\..\..\host\stm32f07x\hal\hal_uart.c</file>
       <file>$PROJ_DIR$\..\..\..\host\stm32f07x\hal\hal.c</file>
       <file>$PROJ_DIR$\..\..\..\module\bt826\bt826.c</file>
-      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_pwr.c</file>
-      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_rcc.c</file>
-      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_tim.c</file>
-      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_misc.c</file>
-      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_usart.c</file>
-      <file>$PROJ_DIR$\..\..\..\utils\utils.c</file>
-      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_syscfg.c</file>
-      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_dma.c</file>
-      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_exti.c</file>
-      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_gpio.c</file>
       <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\CMSIS\Device\ST\STM32F0xx\Source\Templates\system_stm32f0xx.c</file>
+      <file>$PROJ_DIR$\..\..\..\core\at_engine.c</file>
+      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\hal\stm32f0xx_it.c</file>
+      <file>$PROJ_DIR$\..\main.c</file>
       <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\CMSIS\Device\ST\STM32F0xx\Source\Templates\iar\startup_stm32f072.s</file>
+      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_pwr.c</file>
+      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_misc.c</file>
+      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_rcc.c</file>
+      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_syscfg.c</file>
+      <file>$PROJ_DIR$\..\..\..\utils\utils.c</file>
+      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_exti.c</file>
+      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_tim.c</file>
+      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_usart.c</file>
+      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_dma.c</file>
+      <file>$PROJ_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_gpio.c</file>
     </outputs>
   </configuration>
   <configuration>

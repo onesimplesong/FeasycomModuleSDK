@@ -4,9 +4,9 @@
   <Desktop>
     <Static>
       <Debug-Log>
-        <ColumnWidth0>20</ColumnWidth0>
-        <ColumnWidth1>899</ColumnWidth1>
-      </Debug-Log>
+        
+        
+      <ColumnWidth0>20</ColumnWidth0><ColumnWidth1>899</ColumnWidth1></Debug-Log>
       <Build>
         <ColumnWidth0>20</ColumnWidth0>
         <ColumnWidth1>674</ColumnWidth1>
@@ -15,11 +15,11 @@
       </Build>
       <Workspace>
         <ColumnWidths>
-          <Column0>351</Column0>
-          <Column1>27</Column1>
-          <Column2>27</Column2>
-          <Column3>27</Column3>
-        </ColumnWidths>
+          
+          
+          
+          
+        <Column0>351</Column0><Column1>27</Column1><Column2>27</Column2><Column3>27</Column3></ColumnWidths>
       </Workspace>
       <Disassembly>
         <col-names>
@@ -36,25 +36,28 @@
       </Disassembly>
       <WATCH_1>
         <expressions>
-          <item>theApp</item>
-          <item></item>
-        </expressions>
+          
+          
+        <item>theApp</item><item></item></expressions>
         <col-names>
-          <item>Expression</item>
-          <item>Location</item>
-          <item>Type</item>
-          <item>Value</item>
-        </col-names>
+          
+          
+          
+          
+        <item>Expression</item><item>Location</item><item>Type</item><item>Value</item></col-names>
         <col-widths>
-          <item>138</item>
-          <item>150</item>
-          <item>100</item>
-          <item>137</item>
-        </col-widths>
+          
+          
+          
+          
+        <item>138</item><item>150</item><item>100</item><item>137</item></col-widths>
       </WATCH_1>
     </Static>
     <Windows>
-      <Wnd0>
+      
+      
+      
+    <Wnd3>
         <Tabs>
           <Tab>
             <Identity>TabID-18090-560</Identity>
@@ -69,24 +72,20 @@
             <Session/>
           </Tab>
         </Tabs>
-        <SelectedTab>0</SelectedTab>
-      </Wnd0>
-      <Wnd1>
+        
+      <SelectedTab>0</SelectedTab></Wnd3><Wnd4>
         <Tabs>
           <Tab>
             <Identity>TabID-28838-564</Identity>
             <TabName>Workspace</TabName>
             <Factory>Workspace</Factory>
             <Session>
-              <NodeDict>
-                <ExpandedNode>configuration_update</ExpandedNode>
-              </NodeDict>
-            </Session>
+              
+            <NodeDict><ExpandedNode>configuration_update</ExpandedNode></NodeDict></Session>
           </Tab>
         </Tabs>
-        <SelectedTab>0</SelectedTab>
-      </Wnd1>
-      <Wnd2>
+        
+      <SelectedTab>0</SelectedTab></Wnd4><Wnd5>
         <Tabs>
           <Tab>
             <Identity>TabID-6819-567</Identity>
@@ -100,164 +99,21 @@
             <Factory>WATCH_1</Factory>
           </Tab>
         </Tabs>
-        <SelectedTab>1</SelectedTab>
-      </Wnd2>
-    </Windows>
+        
+      <SelectedTab>1</SelectedTab></Wnd5></Windows>
     <Editor>
-      <Pane>
-        <Tab>
-          <Factory>TextEditor</Factory>
-          <Filename>$WS_DIR$\..\main.c</Filename>
-          <XPos>0</XPos>
-          <YPos>0</YPos>
-          <SelStart>0</SelStart>
-          <SelEnd>0</SelEnd>
-          <XPos2>0</XPos2>
-          <YPos2>279</YPos2>
-          <SelStart2>5906</SelStart2>
-          <SelEnd2>5906</SelEnd2>
-        </Tab>
-        <Tab>
-          <Factory>TextEditor</Factory>
-          <Filename>$WS_DIR$\..\..\..\core\at_engine.c</Filename>
-          <XPos>0</XPos>
-          <YPos>0</YPos>
-          <SelStart>0</SelStart>
-          <SelEnd>0</SelEnd>
-          <XPos2>0</XPos2>
-          <YPos2>216</YPos2>
-          <SelStart2>5072</SelStart2>
-          <SelEnd2>5072</SelEnd2>
-        </Tab>
-        <ActiveTab>1</ActiveTab>
-        <Tab>
-          <Factory>TextEditor</Factory>
-          <Filename>$WS_DIR$\..\..\..\host\stm32f07x\hal\hal.c</Filename>
-          <XPos>0</XPos>
-          <YPos>0</YPos>
-          <SelStart>0</SelStart>
-          <SelEnd>0</SelEnd>
-          <XPos2>0</XPos2>
-          <YPos2>79</YPos2>
-          <SelStart2>2259</SelStart2>
-          <SelEnd2>2259</SelEnd2>
-        </Tab>
-        <Tab>
-          <Factory>TextEditor</Factory>
-          <Filename>$WS_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_gpio.c</Filename>
-          <XPos>0</XPos>
-          <YPos>0</YPos>
-          <SelStart>0</SelStart>
-          <SelEnd>0</SelEnd>
-          <XPos2>0</XPos2>
-          <YPos2>276</YPos2>
-          <SelStart2>12006</SelStart2>
-          <SelEnd2>12006</SelEnd2>
-        </Tab>
-      </Pane>
-      <ActivePane>0</ActivePane>
-      <Sizes>
-        <Pane>
-          <X>1000000</X>
-          <Y>1000000</Y>
-        </Pane>
-      </Sizes>
-      <SplitMode>1</SplitMode>
-    </Editor>
+      
+      
+      
+      
+    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\main.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>265</YPos2><SelStart2>5906</SelStart2><SelEnd2>5906</SelEnd2></Tab><ActiveTab>0</ActiveTab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\core\at_engine.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>216</YPos2><SelStart2>5072</SelStart2><SelEnd2>5072</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\host\stm32f07x\hal\hal.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>79</YPos2><SelStart2>2259</SelStart2><SelEnd2>2259</SelEnd2></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\host\stm32f07x\st_libs\STM32F0xx_StdPeriph_Driver\src\stm32f0xx_gpio.c</Filename><XPos>0</XPos><YPos>0</YPos><SelStart>0</SelStart><SelEnd>0</SelEnd><XPos2>0</XPos2><YPos2>276</YPos2><SelStart2>12006</SelStart2><SelEnd2>12006</SelEnd2></Tab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
     <Positions>
-      <Top>
-        <Row0>
-          <Sizes>
-            <Toolbar-0574ADC0>
-              <key>iaridepm.enu1</key>
-            </Toolbar-0574ADC0>
-          </Sizes>
-        </Row0>
-        <Row1>
-          <Sizes>
-            <Toolbar-28682EA0>
-              <key>debuggergui.enu1</key>
-            </Toolbar-28682EA0>
-          </Sizes>
-        </Row1>
-        <Row2>
-          <Sizes>
-            <Toolbar-28683D78>
-              <key>armjlink.enu1</key>
-            </Toolbar-28683D78>
-          </Sizes>
-        </Row2>
-      </Top>
-      <Left>
-        <Row0>
-          <Sizes>
-            <Wnd1>
-              <Rect>
-                <Top>-2</Top>
-                <Left>-2</Left>
-                <Bottom>702</Bottom>
-                <Right>425</Right>
-                <x>-2</x>
-                <y>-2</y>
-                <xscreen>804</xscreen>
-                <yscreen>204</yscreen>
-                <sizeHorzCX>418750</sizeHorzCX>
-                <sizeHorzCY>204614</sizeHorzCY>
-                <sizeVertCX>222396</sizeVertCX>
-                <sizeVertCY>706118</sizeVertCY>
-              </Rect>
-            </Wnd1>
-          </Sizes>
-        </Row0>
-      </Left>
-      <Right>
-        <Row0>
-          <Sizes>
-            <Wnd2>
-              <Rect>
-                <Top>-2</Top>
-                <Left>-2</Left>
-                <Bottom>702</Bottom>
-                <Right>493</Right>
-                <x>-2</x>
-                <y>-2</y>
-                <xscreen>804</xscreen>
-                <yscreen>204</yscreen>
-                <sizeHorzCX>418750</sizeHorzCX>
-                <sizeHorzCY>204614</sizeHorzCY>
-                <sizeVertCX>257813</sizeVertCX>
-                <sizeVertCY>706118</sizeVertCY>
-              </Rect>
-            </Wnd2>
-          </Sizes>
-        </Row0>
-      </Right>
-      <Bottom>
-        <Row0>
-          <Sizes>
-            <Wnd0>
-              <Rect>
-                <Top>-2</Top>
-                <Left>-2</Left>
-                <Bottom>202</Bottom>
-                <Right>1922</Right>
-                <x>-2</x>
-                <y>-2</y>
-                <xscreen>1924</xscreen>
-                <yscreen>204</yscreen>
-                <sizeHorzCX>1002083</sizeHorzCX>
-                <sizeHorzCY>204614</sizeHorzCY>
-                <sizeVertCX>418750</sizeVertCX>
-                <sizeVertCY>204614</sizeVertCY>
-              </Rect>
-            </Wnd0>
-          </Sizes>
-        </Row0>
-      </Bottom>
-      <Float>
-        <Sizes/>
-      </Float>
-    </Positions>
+      
+      
+      
+      
+      
+    <Top><Row0><Sizes><Toolbar-05182108><key>iaridepm.enu1</key></Toolbar-05182108></Sizes></Row0><Row1><Sizes><Toolbar-162B6A00><key>debuggergui.enu1</key></Toolbar-162B6A00></Sizes></Row1><Row2><Sizes><Toolbar-162B79A0><key>armjlink.enu1</key></Toolbar-162B79A0></Sizes></Row2></Top><Left><Row0><Sizes><Wnd4><Rect><Top>-2</Top><Left>-2</Left><Bottom>702</Bottom><Right>425</Right><x>-2</x><y>-2</y><xscreen>804</xscreen><yscreen>204</yscreen><sizeHorzCX>418750</sizeHorzCX><sizeHorzCY>204614</sizeHorzCY><sizeVertCX>222396</sizeVertCX><sizeVertCY>706118</sizeVertCY></Rect></Wnd4></Sizes></Row0></Left><Right><Row0><Sizes><Wnd5><Rect><Top>-2</Top><Left>-2</Left><Bottom>702</Bottom><Right>493</Right><x>-2</x><y>-2</y><xscreen>804</xscreen><yscreen>204</yscreen><sizeHorzCX>418750</sizeHorzCX><sizeHorzCY>204614</sizeHorzCY><sizeVertCX>257813</sizeVertCX><sizeVertCY>706118</sizeVertCY></Rect></Wnd5></Sizes></Row0></Right><Bottom><Row0><Sizes><Wnd3><Rect><Top>-2</Top><Left>-2</Left><Bottom>202</Bottom><Right>1922</Right><x>-2</x><y>-2</y><xscreen>1924</xscreen><yscreen>204</yscreen><sizeHorzCX>1002083</sizeHorzCX><sizeHorzCY>204614</sizeHorzCY><sizeVertCX>418750</sizeVertCX><sizeVertCY>204614</sizeVertCY></Rect></Wnd3></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
   </Desktop>
 </Project>
 

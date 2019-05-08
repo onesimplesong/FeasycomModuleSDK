@@ -1,5 +1,5 @@
-#ifndef _PRIVATE_H_
-#define _PRIVATE_H_
+#ifndef __PRIVATE_H_
+#define __PRIVATE_H_
 
 #include <stdbool.h>
 
@@ -13,17 +13,11 @@
 #define TICK_PERIOD_IN_MS 							(5)
 #define _TO_TICKS(tm)								((tm) / TICK_PERIOD_IN_MS)
 #define _TO_MSEC(tk)								((tk) * TICK_PERIOD_IN_MS)
-#define UART_PARSER_TICKS							_TO_TICKS(30)
 
 
 #define LED_ON_TIMEOUT								(500)
 #define LED_OFF_TIMEOUT								(500)
 
-#define LED_ON_TIMEOUT_UNAUTHED						(200)
-#define LED_OFF_TIMEOUT_UNAUTHED					(200)
-
-//data temp buffer 
-#define DATA_HUART_TX_BUFF_SIZE						128
 #define DATA_TRANSFER_BUFF_SIZE						(2048)
 
 
@@ -31,11 +25,6 @@
 #define FIFO_IDX_BUART_RX							(FIFO_IDX_BASE)
 #define FIFO_IDX_END								(FIFO_IDX_BUART_RX) 
 #define FIFO_MAX_NUM 								(FIFO_IDX_END+1)
-
-
-#if ENABLE_FLOW_CONTROL
-#define FLOW_CONTROL_IS_ON (GPIO_ReadInputDataBit(HUART_CTS_PORT,HUART_CTS_PIN))
-#endif
 
 
 typedef struct
@@ -81,5 +70,5 @@ extern uint8_t DATA_TRANSFER_BUFF_T[];
 extern uint8_t DATA_TRANSFER_BUFF[];
 
 
-#endif
+#endif // __PRIVATE_H_
 
