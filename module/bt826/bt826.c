@@ -8,9 +8,11 @@
 #include "module.h"
 
 
-static const at_pattern_t at_pattern_table[] = 
+#define PLAIN_PATTERN				""
+
+static const bt_pattern_t bt_pattern_table[] = 
 {
-	{ FSC_BT_AT,		""},
+	{ FSC_BT_AT,		PLAIN_PATTERN},
 	{ FSC_BT_NAME,		"+NAME"},
 	{ FSC_BT_PIN, 		"+PIN"},
 	{ FSC_BT_SSP,		"+SSP"},
@@ -41,19 +43,24 @@ static const at_pattern_t at_pattern_table[] =
 	{ FSC_BT_SECURITY,	"+SECURITY"},
 	{ FSC_BT_REBOOT,	"+REBOOT"},
 	{ FSC_BT_RESTORE,	"+RESTORE"},
-	{ END_OF_COMMANDS,	NULL},
+	{ END_OF_COMMANDS,	PLAIN_PATTERN},
 	
 	{ FSC_RESP_OK,		"OK"},
 	{ FSC_RESP_ERROR,	"ERROR"},
-	
-	{ END_OF_ALL_PATTERNS,	NULL},
+	{ END_OF_RESPONSES,	PLAIN_PATTERN},
+
+	{ FSC_TP_INCOMING,	PLAIN_PATTERN},
+	{ FSC_TP_OUTGOING,	PLAIN_PATTERN},
+	{ END_OF_TP_PATTERNS,	PLAIN_PATTERN},
+
+	{ END_OF_ALL_PATTERNS,	PLAIN_PATTERN},
 };
 
 static const module_t bt826_module =
 {
 	.init_time = 1600,
 	.dedicated_at_response_timeout = 150,
-	.at_pattern_table = at_pattern_table,
+	.bt_pattern_table = bt_pattern_table,
 };
 
 const module_t* get_module(void)

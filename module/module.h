@@ -16,7 +16,7 @@ typedef struct
 {
 	uint16_t init_time;
 	uint16_t dedicated_at_response_timeout;
-	const at_pattern_t *at_pattern_table;
+	const bt_pattern_t *bt_pattern_table;
 } module_t;
 
 extern const module_t* get_module(void);

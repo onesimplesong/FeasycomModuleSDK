@@ -41,26 +41,30 @@ typedef enum
 	FSC_BT_SECURITY,
 	FSC_BT_REBOOT,
 	FSC_BT_RESTORE,
-
 	END_OF_COMMANDS, // end of the AT commands
 
 	FSC_RESP_OK = 2001,
 	FSC_RESP_ERROR,
+	END_OF_RESPONSES, // end of the AT responses
 
-	END_OF_ALL_PATTERNS, // end of all the AT patterns
-} at_pattern_index_t;
+	FSC_TP_INCOMING = 3001,
+	FSC_TP_OUTGOING,
+	END_OF_TP_PATTERNS, // end of the throughput patterns
+
+	END_OF_ALL_PATTERNS,
+} bt_pattern_index_t;
 
 typedef struct
 {
-	const at_pattern_index_t	index;
+	const bt_pattern_index_t	index;
     const char					*pattern;
-} at_pattern_t;
+} bt_pattern_t;
 
 typedef void(*read_response_handler_t)(char *, int);
-typedef void(*message_dispatcher_t)(const at_pattern_t *, uint8_t *, int);
+typedef void(*message_dispatcher_t)(const bt_pattern_t *, uint8_t *, int);
 
-uint16_t at_response_parser(char *packet,int size);
-int at_cmd_send(at_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen);
+int at_cmd_send(bt_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen);
+int tp_send(const uint8_t *packet, uint16_t size);
 void at_engine_register_message_dispatcher(message_dispatcher_t message_dispatcher);
 void at_engine_run(void);
 void at_engine_init(void);

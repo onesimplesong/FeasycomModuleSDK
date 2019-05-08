@@ -155,7 +155,7 @@ void app_terminate_task(uint16_t mask)
 	
 	if(!changed_bits) return;
 	
-	theApp.state_mask &= ~mask;	
+	theApp.state_mask &= ~mask;
 }
 
 uint16_t app_get_task(uint16_t bits)
@@ -181,7 +181,7 @@ void event_tickout_process(uint32_t *evt_tickout, void (*tickout_handler)(void))
 	}
 }
 
-void bt_message_dispatcher(const at_pattern_t *pattern, uint8_t *packet, int size)
+void bt_message_dispatcher(const bt_pattern_t *pattern, uint8_t *packet, int size)
 {
 	//DEBUG(("pattern_index=%d",pattern->index));
 
@@ -205,7 +205,6 @@ void bt_message_dispatcher(const at_pattern_t *pattern, uint8_t *packet, int siz
 	}
 	else
 	{
-		//@TODO: handle SCAN results here
 		switch(pattern->index)
 		{
 			case FSC_BT_ADDR:
@@ -216,7 +215,10 @@ void bt_message_dispatcher(const at_pattern_t *pattern, uint8_t *packet, int siz
 				break;
 			case FSC_BT_PLIST:
 				get_bt_plist((char*)packet,size);
-				//DEBUG(("FSC_BT_PLIST"));
+				break;
+			case FSC_TP_INCOMING:
+				tp_send(packet,size); // send back to module
+				theApp.huart->send(packet,size); //print out
 				break;
 			default:
 				break;

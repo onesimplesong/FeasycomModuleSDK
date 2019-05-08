@@ -10,10 +10,10 @@
 #include "at_engine.h"
 
 
-#define AT_ERR_UNINITIALIZED				(-1)
-#define AT_ERR_BUART_BUSY					(-2)
-#define AT_ERR_UNKNOWN_CMD					(-3)
-#define AT_ERR_READ_BUSY					(-4)
+#define BT_ERR_UNINITIALIZED				(-1)
+#define BT_ERR_BUART_BUSY					(-2)
+#define BT_ERR_UNKNOWN_CMD					(-3)
+#define BT_ERR_READ_BUSY					(-4)
 
 #define CHAR_CR								'\r'
 #define CHAR_LF								'\n'
@@ -21,8 +21,8 @@
 
 typedef enum
 {
-	AT_ENGINE_UNINITIALZED,
-	AT_ENGINE_INITIALZED
+	BT_UNINITIALIZED,
+	BT_INITIALIZED
 }at_engine_state_t;
 
 typedef enum
@@ -49,7 +49,7 @@ typedef struct
 	const module_t			*module;
 	char					cmd_buf[256];
 	uint8_t					cmd_buf_len;
-	at_pattern_index_t		command_sent;
+	bt_pattern_index_t		command_sent;
 	message_dispatcher_t	message_dispatcher;
 	at_engine_tx_state_t	tx_state;
 	uint32_t				tx_lock_ticks_last;
@@ -59,7 +59,21 @@ typedef struct
 static at_engine_t ate;
 
 
-static void incoming_message_handler(const at_pattern_t *pattern, char *packet, int size)
+static const bt_pattern_t * get_bt_pattern_by_index(bt_pattern_index_t index)
+{
+	uint8_t i;
+	const bt_pattern_t	*p_table = &ate.module->bt_pattern_table[0];
+
+	for(i = 0; p_table[i].index < END_OF_ALL_PATTERNS; i++)
+	{
+		if(p_table[i].index == index)
+			return &p_table[i];
+	}
+	
+	return NULL;
+}
+
+static void incoming_message_handler(const bt_pattern_t *pattern, char *packet, int size)
 {
 	uint16_t payload_offset = strlen(pattern->pattern);
 	
@@ -67,7 +81,7 @@ static void incoming_message_handler(const at_pattern_t *pattern, char *packet, 
 
 	if(ate.message_dispatcher)
 	{
-		if(FSC_RESP_OK <= pattern->index && pattern->index < END_OF_ALL_PATTERNS)
+		if(FSC_RESP_OK <= pattern->index && pattern->index < END_OF_RESPONSES)
 		{
 			if(FSC_RESP_OK == pattern->index)
 				ate.tx_state = TX_IDLE;
@@ -125,7 +139,7 @@ static uint16_t incoming_message_parser(char *packet,int size)
 	char *datain = packet;
 	int msg_size = get_message_size(packet,size);
 	int num = msg_size;
-	const at_pattern_t	*p_table = &ate.module->at_pattern_table[0];
+	const bt_pattern_t	*p_table = &ate.module->bt_pattern_table[0];
 	uint16_t i;
 
 	if(!msg_size)
@@ -135,7 +149,7 @@ static uint16_t incoming_message_parser(char *packet,int size)
 	num -= 4; // decrease the size due to the CR and LF of both head and tail
 
 	// traversing AT pattern table to find the exact pattern of the packet
-	for(i = 0; p_table[i].index < END_OF_ALL_PATTERNS; i++)
+	for(i = 0; p_table[i].index < END_OF_RESPONSES; i++)
 	{
 		uint8_t pattern_len = strlen((p_table[i].pattern));
 		
@@ -166,7 +180,7 @@ static void buart_rx_callback(uint8_t value)
 	fifo_inst.put(FIFO_IDX_BUART_RX,&value,1);
 }
 
-static int create_at_cmd(at_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen)
+static int create_at_cmd(bt_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen)
 {
 	uint8_t i;
 	const char *pattern = NULL;
@@ -177,11 +191,11 @@ static int create_at_cmd(at_pattern_index_t cmd_idx, const uint8_t *params, uint
 	if(cmd_idx < FSC_BT_AT || cmd_idx >= END_OF_COMMANDS)
 		return 0;
 
-	for(i = 0; ate.module->at_pattern_table[i].index != END_OF_COMMANDS; i++)
+	for(i = 0; ate.module->bt_pattern_table[i].index != END_OF_COMMANDS; i++)
 	{
-		if(ate.module->at_pattern_table[i].index == cmd_idx)
+		if(ate.module->bt_pattern_table[i].index == cmd_idx)
 		{
-			pattern = ate.module->at_pattern_table[i].pattern;
+			pattern = ate.module->bt_pattern_table[i].pattern;
 			break;
 		}
 	}
@@ -200,20 +214,39 @@ static int create_at_cmd(at_pattern_index_t cmd_idx, const uint8_t *params, uint
 	return 1;
 }
 
-int at_cmd_send(at_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen)
+int at_cmd_send(bt_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen)
 {
-	if(ate.state != AT_ENGINE_INITIALZED)
-		return AT_ERR_UNINITIALIZED;
+	if(ate.state != BT_INITIALIZED)
+		return BT_ERR_UNINITIALIZED;
 
 	if(ate.tx_state != TX_IDLE)
-		return AT_ERR_BUART_BUSY;
+		return BT_ERR_BUART_BUSY;
 	
 	if(!create_at_cmd(cmd_idx,params,plen))
-		return AT_ERR_UNKNOWN_CMD;
+		return BT_ERR_UNKNOWN_CMD;
 
+	theApp.buart->send((uint8_t*)ate.cmd_buf,ate.cmd_buf_len);
+	
 	ate.command_sent = cmd_idx;
 	ate.tx_state = TX_PACKET_SENT;
+
+	return 0;
+}
+
+int tp_send(const uint8_t *packet, uint16_t size)
+{
+	if(ate.state != BT_INITIALIZED)
+		return BT_ERR_UNINITIALIZED;
+
+	if(ate.tx_state != TX_IDLE)
+		return BT_ERR_BUART_BUSY;
+
+	memcpy(ate.cmd_buf,packet,size);
+	ate.cmd_buf_len = size;
+	
 	theApp.buart->send((uint8_t*)ate.cmd_buf,ate.cmd_buf_len);
+	
+	ate.tx_state = TX_PACKET_SENT;
 
 	return 0;
 }
@@ -234,7 +267,7 @@ static void buart_rx_parse_once(void)
 	if(hal_bt_connected())
 	{
 		int length = fifo_inst.get(FIFO_IDX_BUART_RX,buf,the_smaller(fifo_len,256));
-		theApp.huart->send(buf,length);
+		incoming_message_handler(get_bt_pattern_by_index(FSC_TP_INCOMING),(char*)buf,length);
 	}
 	else
 	{
@@ -258,17 +291,16 @@ static void buart_rx_parse_once(void)
 	}
 }
 
-void at_engine_run(void)
+static void tx_state_update(void)
 {
-	if(ate.state != AT_ENGINE_INITIALZED)
-	{
-		if(app_get_time() - ate.boot_time_last >= ate.module->init_time)
-		{
-			ate.state = AT_ENGINE_INITIALZED;
-		}
-	}
+	if(ate.tx_state != TX_LOCKED)
+		return;
 
-	if(ate.tx_state == TX_LOCKED)
+	if(hal_bt_connected())
+	{
+		ate.tx_state = TX_IDLE;
+	}
+	else
 	{
 		uint32_t dedicated_at_response_tickout = _TO_TICKS(ate.module->dedicated_at_response_timeout);
 		if(app_get_ticks() - ate.tx_lock_ticks_last > dedicated_at_response_tickout)
@@ -276,13 +308,31 @@ void at_engine_run(void)
 			ate.tx_state = TX_IDLE;
 		}
 	}
+}
+
+static void bt_initialization_check(void)
+{
+	if(ate.state != BT_INITIALIZED)
+	{
+		if(app_get_time() - ate.boot_time_last >= ate.module->init_time)
+		{
+			ate.state = BT_INITIALIZED;
+		}
+	}
+}
+
+void at_engine_run(void)
+{
+	bt_initialization_check();
+	
+	tx_state_update();
 
 	buart_rx_parse_once();
 }
 
 void at_engine_init(void)
 {
-	ate.state = AT_ENGINE_UNINITIALZED;
+	ate.state = BT_UNINITIALIZED;
 	ate.msg_parse_sm = MSG_HEAD_CR;
 	ate.message_dispatcher = NULL;
 	ate.tx_state = TX_IDLE;
