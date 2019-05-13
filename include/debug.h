@@ -8,7 +8,7 @@
 void dbg_printf(const char* Format, ... );
 
 #define DEBUG_OPEN
-#ifdef  DEBUG_OPEN
+#if defined(DEBUG_OPEN) && defined(HAVE_HUART)
 #define DEBUG(x) dbg_printf x
 
 #define print_current_function(pos)		dbg_printf("%s @ position:%d",__FUNCTION__,pos)

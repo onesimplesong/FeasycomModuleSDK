@@ -84,31 +84,7 @@ void get_bt_ver(char *ver, int size)
 	DEBUG(("BT Version: %s",theApp.bt_version));
 
 	app_terminate_task(TASK_MASK_VER_BIT);
-	app_start_task(TASK_MASK_PLIST_BIT);
-}
-
-void get_bt_plist(char *plist, int size)
-{
-	if(size < 12)
-	{
-		if(plist[1] == '{')
-		{
-			theApp.bt_plist_num = 0;
-			app_terminate_task(TASK_MASK_PLIST_BIT);
-		}
-		else if(plist[1] == '}')
-		{
-			app_start_task(TASK_MASK_NAME_BIT);
-		}
-		return ;
-	}
-	
-	if(theApp.bt_plist_num < MAX_PAIRED_DEVICE_NUM)
-	{
-		str_to_addr(theApp.bt_paired_device[theApp.bt_plist_num],(uint8_t*)&plist[3]);
-		DEBUG(("BT Paired Device#%d: %s",theApp.bt_plist_num,addr_to_str(theApp.bt_paired_device[theApp.bt_plist_num])));
-		theApp.bt_plist_num++;
-	}
+	app_start_task(TASK_MASK_NAME_BIT);
 }
 
 void app_excute_task(void)
@@ -123,11 +99,6 @@ void app_excute_task(void)
 	if(tasks & TASK_MASK_VER_BIT)
 	{
 		at_cmd_send(FSC_BT_VER,NULL,0); // read firmware version
-	}
-
-	if(tasks & TASK_MASK_PLIST_BIT)
-	{
-		at_cmd_send(FSC_BT_PLIST,NULL,0); // read paired device list
 	}
 	
 	if(tasks & TASK_MASK_NAME_BIT)
@@ -220,9 +191,6 @@ void bt_message_dispatcher(const bt_pattern_t *pattern, uint8_t *packet, int siz
 		case FSC_BT_VER:
 			get_bt_ver((char*)packet,size);
 			break;
-		case FSC_BT_PLIST:
-			get_bt_plist((char*)packet,size);
-			break;
 		case FSC_TP_INCOMING:
 			fifo_inst.put(FIFO_IDX_BT_INCOMING_DATA,packet,size);
 			break;
@@ -263,12 +231,7 @@ void app_test(void)
 	if(fifo_len)
 	{
 		fifo_len = fifo_inst.peek(FIFO_IDX_BT_INCOMING_DATA,temp_buffer,the_smaller(fifo_len,256));
-#if 1
 		result = tp_send(temp_buffer,fifo_len); // send back to module
-#else
-		theApp.huart->send(temp_buffer,fifo_len); //print out
-		result = BT_OK;
-#endif
 		if(result == BT_OK)
 		{
 			//DEBUG(("sent=%d",fifo_len));

@@ -5,11 +5,8 @@
 #include <stdint.h>
 
 
-
-#define xFSC_BT836
-#define FSC_BT836N
-
 #define HAVE_LED
+#define HAVE_HUART
 
 #define MAX_PAIRED_DEVICE_NUM						(8)
 #define MAX_NAME_LEN 								(31)

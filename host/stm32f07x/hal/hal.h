@@ -108,7 +108,6 @@ int hal_pio_read(uint8_t port, uint8_t pin);
 int hal_bt_connected(void);
 void hal_tick_set_handler(void (*handler)(void));
 void hal_init(void);
-void system_reboot(void);
 
 #endif // __HAL_H_
 

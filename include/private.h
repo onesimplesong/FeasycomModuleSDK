@@ -50,7 +50,9 @@ typedef struct
 	uint16_t					state_mask;
 	bt_dev_state_t				bt_state;
 	uint32_t					conn_state_detect_tickout;
+#ifdef HAVE_HUART
 	const uart_inst_t *			huart;
+#endif
 	const uart_inst_t *			buart;
 }theApp_t;
 

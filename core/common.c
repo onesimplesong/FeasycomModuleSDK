@@ -9,10 +9,11 @@
 #include "common.h"
 
 
-static char btprintf_buffer[128];
 btfifo_t  fifo_ctrl_block[FIFO_MAX_NUM];
 
 
+#ifdef HAVE_HUART
+static char btprintf_buffer[128];
 void dbg_printf( const char* Format, ... )
 {
 	va_list	 parms;
@@ -25,6 +26,7 @@ void dbg_printf( const char* Format, ... )
 	length += 2;
 	theApp.huart->send((uint8_t*)btprintf_buffer, length);
 }
+#endif
 
 int  __btfifo_init(uint8_t fid,uint8_t *buffer, uint32_t size)
 {

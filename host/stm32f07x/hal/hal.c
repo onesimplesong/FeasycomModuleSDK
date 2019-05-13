@@ -59,9 +59,11 @@ static void nvic_init(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	
+#ifdef HAVE_HUART
 	NVIC_InitStructure.NVIC_IRQChannel = HUART_IRQN;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
+#endif
 
 	NVIC_InitStructure.NVIC_IRQChannel = BUART_IRQN;
 	NVIC_Init(&NVIC_InitStructure);
@@ -106,32 +108,40 @@ static void hal_gpio_init(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 
-	GPIO_InitStructure.GPIO_Pin = HUART_RX_PIN;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+#ifdef HAVE_HUART
+	GPIO_InitStructure.GPIO_Pin = HUART_RX_PIN;
 	GPIO_Init(HUART_RX_PORT, &GPIO_InitStructure);
+#endif
 	GPIO_InitStructure.GPIO_Pin = BUART_RX_PIN;
 	GPIO_Init(BUART_RX_PORT, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = HUART_TX_PIN;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+#ifdef HAVE_HUART
+	GPIO_InitStructure.GPIO_Pin = HUART_TX_PIN;
 	GPIO_Init(HUART_TX_PORT, &GPIO_InitStructure);
+#endif
 	GPIO_InitStructure.GPIO_Pin = BUART_TX_PIN;
 	GPIO_Init(BUART_TX_PORT, &GPIO_InitStructure);
 
+#ifdef HAVE_HUART
 	GPIO_PinAFConfig(HUART_TX_PORT,HUART_TX_PIN_SOURCE,HUART_AF_N);
 	GPIO_PinAFConfig(HUART_RX_PORT,HUART_RX_PIN_SOURCE,HUART_AF_N);
+#endif
 	GPIO_PinAFConfig(BUART_TX_PORT,BUART_TX_PIN_SOURCE,BUART_AF_N);
 	GPIO_PinAFConfig(BUART_RX_PORT,BUART_RX_PIN_SOURCE,BUART_AF_N);
 
+#ifdef HAVE_LED
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2; //PB2 PIN32 LED
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
+#endif
 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN;
@@ -148,11 +158,12 @@ static void hal_system_tick_init(void)
 
 static void hal_uart_init(void)
 {
+#ifdef HAVE_HUART
 	theApp.huart = get_huart_instance();
 	theApp.huart->init();
+#endif
 	theApp.buart = get_buart_instance();
 	theApp.buart->init();
-	//theApp.buart->send("123",3);
 }
 
 void hal_init(void)
@@ -170,8 +181,4 @@ void hal_init(void)
 	hal_uart_init();
 }
 
-void system_reboot(void)
-{
-	NVIC_SystemReset();
-}
 
