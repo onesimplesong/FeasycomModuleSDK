@@ -11,8 +11,8 @@
     GPIO_Input ------- Connection_State
     
   Host MCU optinal features:
-  1. LED_Output, indicate the Bluetooth connection status. Define HAVE_LED to enable it.
-  2. HUART, for debugging. Define HAVE_HUART to enable it.
+  * LED_Output, indicate the Bluetooth connection status. Define HAVE_LED to enable it.
+  * HUART, for debugging. Define HAVE_HUART to enable it.
     
   
   Porting Guide
