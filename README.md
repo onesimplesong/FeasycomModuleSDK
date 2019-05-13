@@ -8,7 +8,7 @@
   
     BUART_RXD -------- BT_TXD
     BUART_TXD -------- BT_RXD
-    GPIO_Input ------- Connection_Status
+    GPIO_Input ------- Connection_State
     
   Host MCU optinal features:
     1. LED_Output, indicate the Bluetooth connection status. Define HAVE_LED to enable it.
@@ -16,8 +16,12 @@
     
   
   Porting Guide
+  
   Files listed below need to be changed when porting to a new platform:
   * hal\hal.c
   * hal\hal.h
   * hal\hal_uart.c
   * hal\hal_uart.h
+
+  Module specified parameters are defined in module/MODLUE_NAME/MODLUE_NAME.c. For example, module/bt826/bt826.c defines the parameters 
+  that may only be applicable for BT826.
