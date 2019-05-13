@@ -3,20 +3,19 @@
   
   Feasycom Bluetooth modules including BT826, BT836 are supported.
   
-  Wiring:
-    Host MCU           Bluetooth module
-  
-    BUART_RXD -------- BT_TXD
-    BUART_TXD -------- BT_RXD
-    GPIO_Input ------- Connection_State
+# Wiring
+  |Host MCU|Bluetooth module|
+  |---|----
+  |BUART_RXD|BT_TXD
+  |BUART_TXD|BT_RXD
+  |GPIO_Input|Connection_State
     
-  Host MCU optinal features:
+# Optinal features
   * LED_Output, indicate the Bluetooth connection status. Define HAVE_LED to enable it.
   * HUART, for debugging. Define HAVE_HUART to enable it.
     
   
-  Porting Guide
-  
+# Porting
   Files listed below need to be changed when porting to a new platform:
   * hal\hal.c
   * hal\hal.h
