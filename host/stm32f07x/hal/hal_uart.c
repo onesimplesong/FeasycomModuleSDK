@@ -12,14 +12,13 @@
 
 typedef struct
 {
-	__IO const uint8* tx_ptr;
-	__IO uint16_t tx_size;
-	uint32 baudrate;	
-	void (*tx_callback)(void);		
+	uint32 baudrate;
+	void (*tx_callback)(void);
 	void (*rx_callback)(uint8 c);
 	void (*cts_callback)(void);
 	void (*rx_wakeup_callback)(void);
 }theUART_t;
+
 
 static theUART_t theHUART;
 static theUART_t theBUART;

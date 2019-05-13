@@ -18,12 +18,14 @@
 #define LED_ON_TIMEOUT								(500)
 #define LED_OFF_TIMEOUT								(500)
 
-#define DATA_TRANSFER_BUFF_SIZE						(2048)
+#define BUART_RX_DATA_BUFFER_SIZE					(1024)
+#define BT_INCOMING_DATA_BUFFER_SIZE				(1024)
 
 
 #define FIFO_IDX_BASE								(0)
 #define FIFO_IDX_BUART_RX							(FIFO_IDX_BASE)
-#define FIFO_IDX_END								(FIFO_IDX_BUART_RX) 
+#define FIFO_IDX_BT_INCOMING_DATA					(FIFO_IDX_BUART_RX+1)
+#define FIFO_IDX_END								(FIFO_IDX_BT_INCOMING_DATA) 
 #define FIFO_MAX_NUM 								(FIFO_IDX_END+1)
 
 
@@ -35,13 +37,9 @@ typedef struct
 
 typedef enum
 {
-	SYSTEM_RST_NORMAL = 0,
-	SYSTEM_RST_BT_HW_ERROR,
-	SYSTEM_RST_MCU_HW_ERROR,
-	SYSTEM_RST_RESTORE_TO_FACTORY,
-	SYSTEM_RST_UNKNOWN_ERROR,
-}system_reset_t;
-
+	BTD_DISCONNECTED = 0,
+	BTD_CONNECTED,
+}bt_dev_state_t;
 
 typedef struct
 {
@@ -49,25 +47,23 @@ typedef struct
 	char						bt_version[32];
 	bd_addr_t					bt_paired_device[MAX_PAIRED_DEVICE_NUM];
 	uint8_t						bt_plist_num;
-	uint16_t					state_mask; 
+	uint16_t					state_mask;
+	bt_dev_state_t				bt_state;
+	uint32_t					conn_state_detect_tickout;
 	const uart_inst_t *			huart;
 	const uart_inst_t *			buart;
 }theApp_t;
 
 
 void bt_led_update(void); 
-void system_reset(system_reset_t rst_type);
 uint16_t app_get_task(uint16_t mask);
 void app_start_task(uint16_t mask);
 void app_terminate_task(uint16_t bits);
 uint32_t app_get_ticks(void);
 uint32_t app_get_time(void);
-void event_set_tickout(uint32_t * evt_tickout,uint32_t ticks);
 
 extern theLED_t theLED;
 extern theApp_t theApp;
-extern uint8_t DATA_TRANSFER_BUFF_T[];
-extern uint8_t DATA_TRANSFER_BUFF[];
 
 
 #endif // __PRIVATE_H_

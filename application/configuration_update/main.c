@@ -30,8 +30,9 @@ theLED_t	theLED;
 #endif
 
 
-uint8_t DATA_TRANSFER_BUFF_T[256];
-uint8_t DATA_TRANSFER_BUFF[DATA_TRANSFER_BUFF_SIZE];
+uint8_t temp_buffer[256];
+uint8_t buart_rx_data_buffer[BUART_RX_DATA_BUFFER_SIZE];
+uint8_t bt_incoming_data_buffer[BT_INCOMING_DATA_BUFFER_SIZE];
 
 #ifdef HAVE_LED
 static void hal_set_led(uint16_t on_ticks,uint16_t off_ticks)
@@ -116,27 +117,27 @@ void app_excute_task(void)
 	
 	if(tasks & TASK_MASK_ADDR_BIT)
 	{
-		at_cmd_send(FSC_BT_ADDR,NULL,0);
+		at_cmd_send(FSC_BT_ADDR,NULL,0); // read MAC address
 	}
 	
 	if(tasks & TASK_MASK_VER_BIT)
 	{
-		at_cmd_send(FSC_BT_VER,NULL,0);
+		at_cmd_send(FSC_BT_VER,NULL,0); // read firmware version
 	}
 
 	if(tasks & TASK_MASK_PLIST_BIT)
 	{
-		at_cmd_send(FSC_BT_PLIST,NULL,0);
+		at_cmd_send(FSC_BT_PLIST,NULL,0); // read paired device list
 	}
 	
 	if(tasks & TASK_MASK_NAME_BIT)
 	{
-		at_cmd_send(FSC_BT_NAME,SPLICE_TO_WRITE(APP_BT_NAME),strlen(SPLICE_TO_WRITE(APP_BT_NAME)));
+		at_cmd_send(FSC_BT_NAME,SPLICE_TO_WRITE(APP_BT_NAME),strlen(SPLICE_TO_WRITE(APP_BT_NAME))); // write local device name
 	}
 
 	if(tasks & TASK_MASK_PIN_BIT)
 	{
-		at_cmd_send(FSC_BT_PIN,SPLICE_TO_WRITE(APP_BT_PIN),strlen(SPLICE_TO_WRITE(APP_BT_PIN)));
+		at_cmd_send(FSC_BT_PIN,SPLICE_TO_WRITE(APP_BT_PIN),strlen(SPLICE_TO_WRITE(APP_BT_PIN))); // write local device PIN
 	}
 }
 
@@ -163,12 +164,17 @@ uint16_t app_get_task(uint16_t bits)
 	return theApp.state_mask & bits;
 } 
 
-void event_set_tickout(uint32_t *evt_tickout, uint32_t ticks)
+bool event_timer_exist(uint32_t evt_tickout)
+{
+	return evt_tickout ? true : false;
+}
+
+void event_timer_set(uint32_t *evt_tickout, uint32_t ticks)
 {
 	*evt_tickout = ticks;
 }
 
-void event_tickout_process(uint32_t *evt_tickout, void (*tickout_handler)(void))
+void event_process(uint32_t *evt_tickout, void (*tickout_handler)(void))
 {
 	volatile uint32_t *tickout = evt_tickout;
 	if(*tickout)
@@ -181,48 +187,47 @@ void event_tickout_process(uint32_t *evt_tickout, void (*tickout_handler)(void))
 	}
 }
 
+static void bt_ok_handler(int cmd_index)
+{
+	switch(cmd_index)
+	{
+		case FSC_BT_NAME:
+			app_terminate_task(TASK_MASK_NAME_BIT);
+			app_start_task(TASK_MASK_PIN_BIT);
+			DEBUG(("BT Device Name Updated"));
+			break;
+		case FSC_BT_PIN:
+			app_terminate_task(TASK_MASK_PIN_BIT);
+			DEBUG(("BT PIN Updated"));
+			break;
+		default:
+			break;
+	}
+}
+
 void bt_message_dispatcher(const bt_pattern_t *pattern, uint8_t *packet, int size)
 {
 	//DEBUG(("pattern_index=%d",pattern->index));
 
-	if(FSC_RESP_OK == pattern->index)
+	switch(pattern->index)
 	{
-		int cmd_index = size;
-		switch(cmd_index)
-		{
-			case FSC_BT_NAME:
-				app_terminate_task(TASK_MASK_NAME_BIT);
-				app_start_task(TASK_MASK_PIN_BIT);
-				DEBUG(("BT Device Name Updated"));
-				break;
-			case FSC_BT_PIN:
-				app_terminate_task(TASK_MASK_PIN_BIT);
-				DEBUG(("BT PIN Updated"));
-				break;
-			default:
-				break;
-		}
-	}
-	else
-	{
-		switch(pattern->index)
-		{
-			case FSC_BT_ADDR:
-				get_bt_mac((char*)packet,size);
-				break;
-			case FSC_BT_VER:
-				get_bt_ver((char*)packet,size);
-				break;
-			case FSC_BT_PLIST:
-				get_bt_plist((char*)packet,size);
-				break;
-			case FSC_TP_INCOMING:
-				tp_send(packet,size); // send back to module
-				theApp.huart->send(packet,size); //print out
-				break;
-			default:
-				break;
-		}
+		case FSC_RESP_OK:
+			bt_ok_handler(size);
+			break;
+		case FSC_BT_ADDR:
+			get_bt_mac((char*)packet,size);
+			break;
+		case FSC_BT_VER:
+			get_bt_ver((char*)packet,size);
+			break;
+		case FSC_BT_PLIST:
+			get_bt_plist((char*)packet,size);
+			break;
+		case FSC_TP_INCOMING:
+			fifo_inst.put(FIFO_IDX_BT_INCOMING_DATA,packet,size);
+			break;
+		default:
+			break;
 	}
 }
 
@@ -230,6 +235,46 @@ static void try_start_at_sequence(void)
 {
 	if(!bd_addr_exist(theApp.bt_addr) && !app_get_task(TASK_MASK_ADDR_BIT))
 		app_start_task(TASK_MASK_ADDR_BIT);
+}
+
+static void conn_state_detect(void)
+{
+#ifdef HAVE_LED
+	if(hal_bt_connected())
+	{
+		if(theApp.bt_state == BTD_DISCONNECTED)
+			hal_set_led(0,0);
+		theApp.bt_state = BTD_CONNECTED;
+	}
+	else
+	{
+		if(theApp.bt_state == BTD_CONNECTED)
+			hal_set_led(_TO_TICKS(LED_ON_TIMEOUT), _TO_TICKS(LED_OFF_TIMEOUT));
+		theApp.bt_state = BTD_DISCONNECTED;
+	}
+#endif
+}
+
+void app_test(void)
+{
+	int fifo_len = fifo_inst.len(FIFO_IDX_BT_INCOMING_DATA);
+	int result;
+	
+	if(fifo_len)
+	{
+		fifo_len = fifo_inst.peek(FIFO_IDX_BT_INCOMING_DATA,temp_buffer,the_smaller(fifo_len,256));
+#if 1
+		result = tp_send(temp_buffer,fifo_len); // send back to module
+#else
+		theApp.huart->send(temp_buffer,fifo_len); //print out
+		result = BT_OK;
+#endif
+		if(result == BT_OK)
+		{
+			//DEBUG(("sent=%d",fifo_len));
+			fifo_inst.get(FIFO_IDX_BT_INCOMING_DATA,NULL,fifo_len);
+		}
+	}
 }
 
 void app_execute_once(void)
@@ -240,13 +285,16 @@ void app_execute_once(void)
 	
 	at_engine_run();
 
+	app_test();
+
 	if(app_ticks_last != app_ticks_now)
 	{
 		app_ticks_last = app_ticks_now;
 
-#if defined(HAVE_SPP_MASTER)
-		event_tickout_process(&theApp.conn_tickout,power_on_create_connection_cancel);
-#endif
+		if(bt_initialized() && !event_timer_exist(theApp.conn_state_detect_tickout))
+			event_timer_set(&theApp.conn_state_detect_tickout,_TO_TICKS(5));
+		
+		event_process(&theApp.conn_state_detect_tickout,conn_state_detect);
     } 
 }
 
@@ -295,7 +343,8 @@ static void app_init(void)
 static void fifo_init(void)
 {
 	memset((uint8_t*)fifo_ctrl_block,0,sizeof(btfifo_t)*FIFO_MAX_NUM/sizeof(uint8_t));	
-	fifo_inst.init(FIFO_IDX_BUART_RX,DATA_TRANSFER_BUFF,DATA_TRANSFER_BUFF_SIZE);
+	fifo_inst.init(FIFO_IDX_BUART_RX,buart_rx_data_buffer,BUART_RX_DATA_BUFFER_SIZE);
+	fifo_inst.init(FIFO_IDX_BT_INCOMING_DATA,bt_incoming_data_buffer,BT_INCOMING_DATA_BUFFER_SIZE);
 }
 
 int main(void)

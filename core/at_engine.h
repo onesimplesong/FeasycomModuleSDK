@@ -1,10 +1,17 @@
 
 #ifndef _BTAPI_H_
 #define _BTAPI_H_
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "common.h"
 
+
+#define BT_OK								(0)
+#define BT_ERR_UNINITIALIZED				(-1)
+#define BT_ERR_BUART_BUSY					(-2)
+#define BT_ERR_UNKNOWN_CMD					(-3)
+#define BT_ERR_READ_BUSY					(-4)
 
 typedef const uint8_t      *ptr;
 
@@ -66,6 +73,7 @@ typedef void(*message_dispatcher_t)(const bt_pattern_t *, uint8_t *, int);
 int at_cmd_send(bt_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen);
 int tp_send(const uint8_t *packet, uint16_t size);
 void at_engine_register_message_dispatcher(message_dispatcher_t message_dispatcher);
+int bt_initialized(void);
 void at_engine_run(void);
 void at_engine_init(void);
 

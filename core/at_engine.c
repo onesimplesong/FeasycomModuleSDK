@@ -10,11 +10,6 @@
 #include "at_engine.h"
 
 
-#define BT_ERR_UNINITIALIZED				(-1)
-#define BT_ERR_BUART_BUSY					(-2)
-#define BT_ERR_UNKNOWN_CMD					(-3)
-#define BT_ERR_READ_BUSY					(-4)
-
 #define CHAR_CR								'\r'
 #define CHAR_LF								'\n'
 
@@ -47,6 +42,7 @@ typedef struct
 	message_parse_state_t	msg_parse_sm;
 	uint32_t				boot_time_last;
 	const module_t			*module;
+	uint8_t					rx_buf[256];
 	char					cmd_buf[256];
 	uint8_t					cmd_buf_len;
 	bt_pattern_index_t		command_sent;
@@ -168,11 +164,8 @@ static uint16_t incoming_message_parser(char *packet,int size)
 
 static void buart_tx_callback(void)
 {
-	if(ate.tx_state == TX_PACKET_SENT)
-	{
-		ate.tx_state = TX_LOCKED;
-		ate.tx_lock_ticks_last = app_get_ticks();
-	}
+	ate.tx_state = TX_LOCKED;
+	ate.tx_lock_ticks_last = app_get_ticks();
 }
 
 static void buart_rx_callback(uint8_t value)
@@ -225,12 +218,11 @@ int at_cmd_send(bt_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen
 	if(!create_at_cmd(cmd_idx,params,plen))
 		return BT_ERR_UNKNOWN_CMD;
 
-	theApp.buart->send((uint8_t*)ate.cmd_buf,ate.cmd_buf_len);
-	
 	ate.command_sent = cmd_idx;
 	ate.tx_state = TX_PACKET_SENT;
+	theApp.buart->send((uint8_t*)ate.cmd_buf,ate.cmd_buf_len);	
 
-	return 0;
+	return BT_OK;
 }
 
 int tp_send(const uint8_t *packet, uint16_t size)
@@ -244,11 +236,10 @@ int tp_send(const uint8_t *packet, uint16_t size)
 	memcpy(ate.cmd_buf,packet,size);
 	ate.cmd_buf_len = size;
 	
-	theApp.buart->send((uint8_t*)ate.cmd_buf,ate.cmd_buf_len);
-	
 	ate.tx_state = TX_PACKET_SENT;
+	theApp.buart->send((uint8_t*)ate.cmd_buf,ate.cmd_buf_len);
 
-	return 0;
+	return BT_OK;
 }
 
 void at_engine_register_message_dispatcher(message_dispatcher_t message_dispatcher)
@@ -258,7 +249,7 @@ void at_engine_register_message_dispatcher(message_dispatcher_t message_dispatch
 
 static void buart_rx_parse_once(void)
 {
-	uint8_t *buf = DATA_TRANSFER_BUFF_T;
+	uint8_t *buf = ate.rx_buf;
 	uint16_t fifo_len = fifo_inst.len(FIFO_IDX_BUART_RX);
 	
 	if(!fifo_len)
@@ -298,7 +289,7 @@ static void tx_state_update(void)
 
 	if(hal_bt_connected())
 	{
-		ate.tx_state = TX_IDLE;
+		ate.tx_state = TX_IDLE;		
 	}
 	else
 	{
@@ -319,6 +310,11 @@ static void bt_initialization_check(void)
 			ate.state = BT_INITIALIZED;
 		}
 	}
+}
+
+int bt_initialized(void)
+{
+	return (ate.state == BT_INITIALIZED ? 1 : 0);
 }
 
 void at_engine_run(void)
