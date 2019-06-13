@@ -75,16 +75,17 @@ void get_bt_mac(char *addr, int size)
 	DEBUG(("BT MAC: %s",addr_to_str(theApp.bt_addr)));
 
 	app_terminate_task(TASK_MASK_ADDR_BIT);
-	app_start_task(TASK_MASK_VER_BIT);
+	app_start_task(TASK_MASK_NAME_BIT);
 }
 
-void get_bt_ver(char *ver, int size)
-{	
-	memcpy(theApp.bt_version,(uint8_t*)&ver[1],size-1);
-	DEBUG(("BT Version: %s",theApp.bt_version));
+void get_bt_name(char *name, int size)
+{
+    // skip '='
+	--size;
+    name++;
 
-	app_terminate_task(TASK_MASK_VER_BIT);
-	app_start_task(TASK_MASK_NAME_BIT);
+	if(!memcmp(name,APP_BT_NAME,size) && size == strlen(APP_BT_NAME))
+		DEBUG(("BT Name Updated"));
 }
 
 void app_excute_task(void)
@@ -96,19 +97,9 @@ void app_excute_task(void)
 		at_cmd_send(FSC_BT_ADDR,NULL,0); // read MAC address
 	}
 	
-	if(tasks & TASK_MASK_VER_BIT)
-	{
-		at_cmd_send(FSC_BT_VER,NULL,0); // read firmware version
-	}
-	
 	if(tasks & TASK_MASK_NAME_BIT)
 	{
 		at_cmd_send(FSC_BT_NAME,SPLICE_TO_WRITE(APP_BT_NAME),strlen(SPLICE_TO_WRITE(APP_BT_NAME))); // write local device name
-	}
-
-	if(tasks & TASK_MASK_PIN_BIT)
-	{
-		at_cmd_send(FSC_BT_PIN,SPLICE_TO_WRITE(APP_BT_PIN),strlen(SPLICE_TO_WRITE(APP_BT_PIN))); // write local device PIN
 	}
 }
 
@@ -163,13 +154,11 @@ static void bt_ok_handler(int cmd_index)
 	switch(cmd_index)
 	{
 		case FSC_BT_NAME:
-			app_terminate_task(TASK_MASK_NAME_BIT);
-			app_start_task(TASK_MASK_PIN_BIT);
-			DEBUG(("BT Device Name Updated"));
-			break;
-		case FSC_BT_PIN:
-			app_terminate_task(TASK_MASK_PIN_BIT);
-			DEBUG(("BT PIN Updated"));
+			if(app_get_task(TASK_MASK_NAME_BIT))
+			{
+				app_terminate_task(TASK_MASK_NAME_BIT);
+				at_cmd_send(FSC_BT_NAME,NULL,0); // read back to check
+			}
 			break;
 		default:
 			break;
@@ -188,11 +177,11 @@ void bt_message_dispatcher(const bt_pattern_t *pattern, uint8_t *packet, int siz
 		case FSC_BT_ADDR:
 			get_bt_mac((char*)packet,size);
 			break;
-		case FSC_BT_VER:
-			get_bt_ver((char*)packet,size);
+		case FSC_BT_NAME:
+			get_bt_name((char*)packet,size);
 			break;
 		case FSC_TP_INCOMING:
-			fifo_inst.put(FIFO_IDX_BT_INCOMING_DATA,packet,size);
+			cache_push(CACHE_IDX_BT_INCOMING_DATA,packet,size);
 			break;
 		default:
 			break;
@@ -225,17 +214,17 @@ static void conn_state_detect(void)
 
 void app_test(void)
 {
-	int fifo_len = fifo_inst.len(FIFO_IDX_BT_INCOMING_DATA);
+	int fifo_len = cache_size(CACHE_IDX_BT_INCOMING_DATA);
 	int result;
 	
 	if(fifo_len)
 	{
-		fifo_len = fifo_inst.peek(FIFO_IDX_BT_INCOMING_DATA,temp_buffer,the_smaller(fifo_len,256));
+		fifo_len = cache_pop(CACHE_IDX_BT_INCOMING_DATA,temp_buffer,the_smaller(fifo_len,256),1);
 		result = tp_send(temp_buffer,fifo_len); // send back to module
 		if(result == BT_OK)
 		{
 			//DEBUG(("sent=%d",fifo_len));
-			fifo_inst.get(FIFO_IDX_BT_INCOMING_DATA,NULL,fifo_len);
+			cache_pop(CACHE_IDX_BT_INCOMING_DATA,NULL,fifo_len,0);
 		}
 	}
 }
@@ -305,9 +294,8 @@ static void app_init(void)
 
 static void fifo_init(void)
 {
-	memset((uint8_t*)fifo_ctrl_block,0,sizeof(btfifo_t)*FIFO_MAX_NUM/sizeof(uint8_t));	
-	fifo_inst.init(FIFO_IDX_BUART_RX,buart_rx_data_buffer,BUART_RX_DATA_BUFFER_SIZE);
-	fifo_inst.init(FIFO_IDX_BT_INCOMING_DATA,bt_incoming_data_buffer,BT_INCOMING_DATA_BUFFER_SIZE);
+	cache_init(CACHE_IDX_BUART_RX,buart_rx_data_buffer,BUART_RX_DATA_BUFFER_SIZE);
+	cache_init(CACHE_IDX_BT_INCOMING_DATA,bt_incoming_data_buffer,BT_INCOMING_DATA_BUFFER_SIZE);
 }
 
 int main(void)

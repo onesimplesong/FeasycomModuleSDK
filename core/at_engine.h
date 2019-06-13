@@ -12,6 +12,9 @@
 #define BT_ERR_BUART_BUSY					(-2)
 #define BT_ERR_UNKNOWN_CMD					(-3)
 #define BT_ERR_READ_BUSY					(-4)
+#define BT_ERR_NOT_TP_STATE					(-5)
+#define BT_ERR_NOT_ATCMD_STATE				(-6)
+
 
 typedef const uint8_t      *ptr;
 

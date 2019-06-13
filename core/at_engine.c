@@ -170,7 +170,7 @@ static void buart_tx_callback(void)
 
 static void buart_rx_callback(uint8_t value)
 {
-	fifo_inst.put(FIFO_IDX_BUART_RX,&value,1);
+	cache_push(CACHE_IDX_BUART_RX,&value,1);
 }
 
 static int create_at_cmd(bt_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen)
@@ -209,6 +209,9 @@ static int create_at_cmd(bt_pattern_index_t cmd_idx, const uint8_t *params, uint
 
 int at_cmd_send(bt_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen)
 {
+	if(hal_bt_connected())
+		return BT_ERR_NOT_ATCMD_STATE;
+
 	if(ate.state != BT_INITIALIZED)
 		return BT_ERR_UNINITIALIZED;
 
@@ -227,6 +230,9 @@ int at_cmd_send(bt_pattern_index_t cmd_idx, const uint8_t *params, uint16_t plen
 
 int tp_send(const uint8_t *packet, uint16_t size)
 {
+	if(!hal_bt_connected())
+		return BT_ERR_NOT_TP_STATE;
+		
 	if(ate.state != BT_INITIALIZED)
 		return BT_ERR_UNINITIALIZED;
 
@@ -250,19 +256,19 @@ void at_engine_register_message_dispatcher(message_dispatcher_t message_dispatch
 static void buart_rx_parse_once(void)
 {
 	uint8_t *buf = ate.rx_buf;
-	uint16_t fifo_len = fifo_inst.len(FIFO_IDX_BUART_RX);
+	uint16_t fifo_len = cache_size(CACHE_IDX_BUART_RX);
 	
 	if(!fifo_len)
 		return;
 
 	if(hal_bt_connected())
 	{
-		int length = fifo_inst.get(FIFO_IDX_BUART_RX,buf,the_smaller(fifo_len,256));
+		int length = cache_pop(CACHE_IDX_BUART_RX,buf,the_smaller(fifo_len,256),0);
 		incoming_message_handler(get_bt_pattern_by_index(FSC_TP_INCOMING),(char*)buf,length);
 	}
 	else
 	{
-		int length = fifo_inst.peek(FIFO_IDX_BUART_RX,buf,the_smaller(fifo_len,256));
+		int length = cache_pop(CACHE_IDX_BUART_RX,buf,the_smaller(fifo_len,256),1);
 		if(length)
 		{
 			int can_discard_data = 0;
@@ -277,7 +283,7 @@ static void buart_rx_parse_once(void)
 			if(length > 100)
 				can_discard_data = 1;
 			if(can_discard_data)
-				fifo_inst.get(FIFO_IDX_BUART_RX,NULL,length);
+				cache_pop(CACHE_IDX_BUART_RX,NULL,length,0);
 		}
 	}
 }

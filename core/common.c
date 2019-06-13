@@ -9,7 +9,6 @@
 #include "common.h"
 
 
-btfifo_t  fifo_ctrl_block[FIFO_MAX_NUM];
 
 
 #ifdef HAVE_HUART
@@ -28,84 +27,91 @@ void dbg_printf( const char* Format, ... )
 }
 #endif
 
-int  __btfifo_init(uint8_t fid,uint8_t *buffer, uint32_t size)
+
+struct queue_context {
+	uint8_t   *buf;
+	uint16_t  head;
+	uint16_t  tail;
+	uint16_t  size;
+	uint16_t  max_size;
+};
+
+static struct queue_context _context[CACHE_MAX_NUM];
+
+#define queue_head(context)           (context->head)
+#define queue_next(context)           (context->tail)
+#define queue_size(context)           (context->size)
+#define queue_latter_size(context)    (context->max_size - context->head)
+#define queue_latter_rest(context)    (context->max_size - context->tail)
+
+#define queue_expand(context,n) do { \
+	context->tail = (context->tail + n) % context->max_size; \
+	context->size += n; \
+} while (0)
+
+#define queue_shrink(context,n) do { \
+	context->head = (context->head + n) % context->max_size; \
+	context->size -= n; \
+} while (0)
+
+
+void cache_init(uint8_t cid, uint8_t *buffer, uint16_t size)
 {
-	if (!is_power_of_2(size)) return -1;
-	
-	memset(&fifo_ctrl_block[fid], 0, sizeof(btfifo_t));
-	fifo_ctrl_block[fid].buffer = buffer;
-	fifo_ctrl_block[fid].size = size;
-	fifo_ctrl_block[fid].in = 0;
-	fifo_ctrl_block[fid].out = 0;
-	
+	struct queue_context *context = &_context[cid];
+	context->buf = buffer;
+	context->head = 0;
+	context->tail = 0;
+	context->size = 0;
+	context->max_size = size;
+}
+
+uint16_t cache_push(uint8_t cid, uint8_t *packet, uint16_t size)
+{
+	struct queue_context *context = &_context[cid];
+	uint16_t num;
+    
+	size = the_smaller(context->max_size - queue_size(context), size);
+	if(size)
+	{
+		num = the_smaller(size,queue_latter_rest(context));
+		memcpy(context->buf + queue_next(context), packet, num);
+		memcpy(context->buf, packet + num, size - num);
+		queue_expand(context,size);
+		return size;
+	}
+    
 	return 0;
 }
 
-uint32_t __btfifo_len(uint8_t fid)
+uint16_t cache_pop(uint8_t cid, uint8_t *packet, uint16_t size, uint8_t preserve)
 {
-    return (fifo_ctrl_block[fid].in - fifo_ctrl_block[fid].out);
-}
+	struct queue_context *context = &_context[cid];
+	uint16_t num;
 
-uint32_t __btfifo_get(uint8_t fid, uint8_t * buffer, uint32_t size)
-{
-	uint32_t len = 0;
-	btfifo_t * fifo = &fifo_ctrl_block[fid];
-	uint32_t in = fifo->in; //prefetch counter 'in' for better reentrant operation
-	
-	size  = the_smaller(size, in - fifo->out);
-	/* first get the data from fifo->out until the end of the buffer */
-	len = the_smaller(size, fifo->size - (fifo->out & (fifo->size - 1)));	
-	if(buffer)
+	size = the_smaller(queue_size(context), size);
+	if(size)
 	{
-		memcpy(buffer, fifo->buffer + (fifo->out & (fifo->size - 1)), len);
-		/* then get the rest (if any) from the beginning of the buffer */
-		memcpy(buffer + len, fifo->buffer, size - len);
+		num = the_smaller(size,queue_latter_size(context));
+		if(packet)
+		{
+			memcpy(packet, context->buf + queue_head(context), num);
+			memcpy(packet + num, context->buf, size - num);
+		}
+		if(!preserve)
+		{
+			HOST_ENTER_CRITICAL();
+			queue_shrink(context,size);
+			HOST_EXIT_CRITICAL();
+		}
+		return size;
 	}
-	fifo->out += size;
-	
-	return size;
+
+	return 0;
 }
 
-uint32_t __btfifo_peek(uint8_t fid, uint8_t * buffer, uint32_t size)
+uint16_t cache_size(uint8_t cid)
 {
-	uint32_t len = 0;
-	btfifo_t * fifo = &fifo_ctrl_block[fid];
-	uint32_t in = fifo->in; //prefetch counter 'in' for better reentrant operation
-	
-	size  = the_smaller(size, in - fifo->out);
-	/* first get the data from fifo->out until the end of the buffer */
-	len = the_smaller(size, fifo->size - (fifo->out & (fifo->size - 1)));	
-	memcpy(buffer, fifo->buffer + (fifo->out & (fifo->size - 1)), len);
-	/* then get the rest (if any) from the beginning of the buffer */
-	memcpy(buffer + len, fifo->buffer, size - len);
-	
-	return size;	
+	struct queue_context *context = &_context[cid];
+	return queue_size(context);
 }
 
-uint32_t __btfifo_put(uint8_t fid, uint8_t *buffer, uint32_t size)
-{
-	uint32_t len = 0;
-	btfifo_t * fifo = &fifo_ctrl_block[fid];
-	
-	size = the_smaller(size, fifo->size - (fifo->in - fifo->out));
-	len  = the_smaller(size, fifo->size - (fifo->in & (fifo->size - 1)));
-	if(buffer)
-	{
-		memcpy(fifo->buffer + (fifo->in & (fifo->size - 1)), buffer, len);
-		/* then put the rest (if any) at the beginning of the buffer */
-		memcpy(fifo->buffer, buffer + len, size - len);
-	}
-	fifo->in += size;
-	
-	return size;
-}
-
-const fifo_inst_t fifo_inst = 
-{
-	&__btfifo_init,
-	&__btfifo_len,
-	&__btfifo_get,
-	&__btfifo_peek,
-	&__btfifo_put,
-};
-	

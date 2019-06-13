@@ -22,11 +22,11 @@
 #define BT_INCOMING_DATA_BUFFER_SIZE				(1024)
 
 
-#define FIFO_IDX_BASE								(0)
-#define FIFO_IDX_BUART_RX							(FIFO_IDX_BASE)
-#define FIFO_IDX_BT_INCOMING_DATA					(FIFO_IDX_BUART_RX+1)
-#define FIFO_IDX_END								(FIFO_IDX_BT_INCOMING_DATA) 
-#define FIFO_MAX_NUM 								(FIFO_IDX_END+1)
+#define CACHE_IDX_BASE								(0)
+#define CACHE_IDX_BUART_RX							(CACHE_IDX_BASE)
+#define CACHE_IDX_BT_INCOMING_DATA					(CACHE_IDX_BUART_RX+1)
+#define CACHE_IDX_END								(CACHE_IDX_BT_INCOMING_DATA) 
+#define CACHE_MAX_NUM 								(CACHE_IDX_END+1)
 
 
 typedef struct
