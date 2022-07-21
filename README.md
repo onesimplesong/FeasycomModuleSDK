@@ -1,5 +1,5 @@
 # FeasycomModuleSDK
-  Feasycom Module SDK now is available!
+  Feasycom Module SDK now is available! The SDK makes it easier to use a host MCU to communicate with Feasycom's IoT module.
   
   Feasycom Bluetooth modules including BT826, BT836 are supported.
   
